@@ -13,7 +13,7 @@ chapters = int(input("How many chapters does this book have? "))
 path = os.path.join("Bible", translation, book)
 os.makedirs(path, exist_ok=True)
 
-headers = {"User-Agent": "Mozilla/5.0"}  # avoids being blocked
+headers = {"User-Agent": "Mozilla/5.0"}  
 
 for chapter in range(1, chapters+1):
     full_url = f"{base_url}?search={book}+{chapter}&version={translation}"
