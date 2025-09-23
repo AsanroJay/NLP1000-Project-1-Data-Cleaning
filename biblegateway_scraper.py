@@ -5,7 +5,6 @@ import requests
 from bs4 import BeautifulSoup
 
 base_url = "https://www.biblegateway.com/passage/"
-
 book = input("Enter the book of the Bible (e.g., John): ").strip()
 translation = input("Enter the translation: ").strip().upper()
 chapters = int(input("How many chapters does this book have? "))
