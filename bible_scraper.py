@@ -10,7 +10,7 @@ book = input("Enter the book of the Bible (e.g., John): ").strip()
 translation = input("Enter the translation (e.g., TGL, CEB, KJV): ").strip().upper()
 chapters = int(input("How many chapters does this book have? "))
 
-# Make directories
+
 path = os.path.join("Bible", translation, book)
 os.makedirs(path, exist_ok=True)
 
@@ -28,7 +28,6 @@ for chapter in range(1, chapters+1):
 
     chapter_text = []
     for v in verses:
-        # strip verse numbers if needed
         text = v.get_text(" ", strip=True)
         chapter_text.append(text)
 
