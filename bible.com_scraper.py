@@ -23,7 +23,7 @@ pathname = translation +' - '+ language
 
 # Save path
 newbook = book_equivalence(book)
-path = os.path.join("Bible", translation, pathname)
+path = os.path.join("Bible", pathname, newbook)
 os.makedirs(path, exist_ok=True)
 
 headers = {"User-Agent": "Mozilla/5.0"}
