@@ -17,10 +17,13 @@ version = input("Enter the version seen on bible.com (e.g., 1588 for KJV): ").st
 book = input("Enter the book of the Bible (e.g., GEN for Genesis, JHN for John): ").strip().upper()
 translation = input("Enter the translation code (e.g., KJV, NIV, TGL): ").strip().upper()
 chapters = int(input("How many chapters does this book have? "))
+language = input("Enter the language name: ").strip()
+
+pathname = translation +' - '+ language
 
 # Save path
 newbook = book_equivalence(book)
-path = os.path.join("Bible", translation, newbook)
+path = os.path.join("Bible", translation, pathname)
 os.makedirs(path, exist_ok=True)
 
 headers = {"User-Agent": "Mozilla/5.0"}
