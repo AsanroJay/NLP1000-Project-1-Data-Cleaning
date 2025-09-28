@@ -36,7 +36,14 @@ def clean_text_folder(raw_dir, clean_dir, expressions):
 
             if matches:
                 # Rebuild as "VerseNumber Text" per line
-                text = "\n".join(f"{num} {verse.strip()}" for num, verse in matches if verse.strip())
+                if matches:
+                    fixed = []
+                    for i, (num, verse) in enumerate(matches):
+                        if i == 0:  # always set first verse to 1
+                            fixed.append(f"1 {verse.strip()}")
+                        else:
+                            fixed.append(f"{num} {verse.strip()}")
+                    text = "\n".join(fixed)
 
             # Save cleaned file
             with open(clean_path, "w", encoding="utf-8") as f:
