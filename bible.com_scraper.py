@@ -35,7 +35,11 @@ for chapter in range(1, chapters+1):
     page = requests.get(full_url, headers=headers)
     soup = BeautifulSoup(page.text, "html.parser")
 
-    # On Bible.com, verses are in spans with data-usfm attributes
+    # 🔹 Remove fact bubbles completely before scraping
+    for note in soup.find_all("span", class_=lambda c: c and "ChapterContent_note__" in c):
+        note.decompose()
+
+    # 🔹 Now collect only verse spans
     verses = soup.find_all("span", attrs={"data-usfm": True})
 
     chapter_text = []
