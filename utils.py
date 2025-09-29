@@ -50,3 +50,40 @@ def clean_text_folder(raw_dir, clean_dir, expressions):
                 f.write(text)
 
             print(f"Cleaned: {file}")
+            
+            
+            
+def clean_text_folder_no_flatten(raw_dir, clean_dir, expressions):
+    """
+    Cleans all text files in a folder using regex expressions without flattening verses.
+
+    Parameters:
+    - raw_dir: folder containing raw text files
+    - clean_dir: folder where cleaned files will be saved
+    - expressions: list of (pattern, replacement) tuples
+    """
+
+    os.makedirs(clean_dir, exist_ok=True)
+
+    for file in os.listdir(raw_dir):
+        if file.endswith(".txt"):
+            raw_path = os.path.join(raw_dir, file)
+            clean_path = os.path.join(clean_dir, file)
+
+            with open(raw_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()  # Keep verses as separate lines
+
+            cleaned_lines = []
+            for line in lines:
+                for pattern, repl in expressions:
+                    line = re.sub(pattern, repl, line)
+                # Normalize spaces but keep line breaks
+                line = re.sub(r"\s+", " ", line).strip()
+                if line:
+                    cleaned_lines.append(line)
+
+            # Save cleaned file
+            with open(clean_path, "w", encoding="utf-8") as f:
+                f.write("\n".join(cleaned_lines))
+
+            print(f"Cleaned: {file}")
