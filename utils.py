@@ -87,3 +87,63 @@ def clean_text_folder_no_flatten(raw_dir, clean_dir, expressions):
                 f.write("\n".join(cleaned_lines))
 
             print(f"Cleaned: {file}")
+            
+
+def clean_verses_in_folder(folder_path):
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".txt"):
+            file_path = os.path.join(folder_path, filename)
+
+            with open(file_path, "r", encoding="utf-8") as f:
+                text = f.read()
+
+            cleaned = clean_verses(text)
+
+            with open(file_path, "w", encoding="utf-8") as f:
+                for num, verse in cleaned:
+                    f.write(f"{num} {verse}\n")
+
+            print(f"✔ Cleaned {filename}")
+
+
+def clean_verses(text):
+    lines = text.splitlines()
+    verses = []
+    expected = 1
+
+    for line in lines:
+        parts = line.strip().split(maxsplit=1)
+
+        if not parts:
+            continue
+
+        num = parts[0]
+        verse_text = parts[1] if len(parts) > 1 else ""
+
+        # If it's a range like 18-19, keep as-is
+        if "-" in num and all(x.isdigit() for x in num.split("-")):
+            verses.append((num, verse_text.strip()))
+            # bump expected to after the range
+            start, end = map(int, num.split("-"))
+            expected = end + 1
+
+        elif num.isdigit():
+            num = int(num)
+
+            if num == expected:
+                verses.append((num, verse_text.strip()))
+                expected += 1
+            else:
+                # Probably a mis-detected number → merge with previous
+                if verses:
+                    prev_num, prev_text = verses[-1]
+                    verses[-1] = (prev_num, prev_text + " " + line.strip())
+                else:
+                    verses.append((num, verse_text.strip()))
+        else:
+            # continuation line
+            if verses:
+                prev_num, prev_text = verses[-1]
+                verses[-1] = (prev_num, prev_text + " " + line.strip())
+
+    return verses
