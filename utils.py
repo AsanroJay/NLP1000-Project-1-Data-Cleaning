@@ -103,8 +103,7 @@ def clean_verses_in_folder(folder_path):
                 for num, verse in cleaned:
                     f.write(f"{num} {verse}\n")
 
-            print(f"✔ Cleaned {filename}")
-
+            print(f"Cleaned Verses {filename}")
 
 def clean_verses(text):
     lines = text.splitlines()
@@ -120,12 +119,13 @@ def clean_verses(text):
         num = parts[0]
         verse_text = parts[1] if len(parts) > 1 else ""
 
-        # If it's a range like 18-19, keep as-is
+        # Handle ranges like 2-3
         if "-" in num and all(x.isdigit() for x in num.split("-")):
-            verses.append((num, verse_text.strip()))
-            # bump expected to after the range
             start, end = map(int, num.split("-"))
+            # Save the whole range as one verse entry
+            verses.append((f"{start}-{end}", verse_text.strip()))
             expected = end + 1
+            continue
 
         elif num.isdigit():
             num = int(num)
@@ -134,16 +134,49 @@ def clean_verses(text):
                 verses.append((num, verse_text.strip()))
                 expected += 1
             else:
-                # Probably a mis-detected number → merge with previous
+                # Mis-detected number → merge with previous
                 if verses:
                     prev_num, prev_text = verses[-1]
                     verses[-1] = (prev_num, prev_text + " " + line.strip())
                 else:
                     verses.append((num, verse_text.strip()))
         else:
-            # continuation line
+            # Continuation line
             if verses:
                 prev_num, prev_text = verses[-1]
                 verses[-1] = (prev_num, prev_text + " " + line.strip())
 
     return verses
+
+
+def align_verses(book, chapters, folder):
+    """
+    For each chapter file in a book, ensure every verse number or verse range
+    starts on a new line.
+
+    Args:
+        book (str): Book name (e.g., 'Leviticus')
+        chapters (list[int]): Specific chapters to process (e.g., [1,2,5])
+        folder (str): Path to folder containing the chapter text files
+    """
+    verse_pattern = r'(\d+(?:-\d+)?)\s+'  # matches "1 " or "18-19 "
+
+    for chapter in chapters:
+        filename = f"{book}_{chapter}.txt"
+        file_path = os.path.join(folder, filename)
+
+        if not os.path.exists(file_path):
+            print(f"Skipping missing file: {file_path}")
+            continue
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            text = f.read()
+
+        # Insert newline before each verse number/range
+        aligned = re.sub(verse_pattern, r'\n\1 ', text)
+        aligned = aligned.strip()
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(aligned)
+
+        print(f"Aligned {filename}")
