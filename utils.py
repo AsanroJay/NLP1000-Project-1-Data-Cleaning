@@ -193,8 +193,6 @@ def segment_by_verse(folder_path):
 
     Automatically sorts rows by chapter and verse.
     """
-
-    # Determine output path
     parts = folder_path.replace("\\", "/").split("/")
     language = parts[-2]
     book = parts[-1]
@@ -225,7 +223,7 @@ def segment_by_verse(folder_path):
                 verse_number = parts_line[0]
                 verse_text = parts_line[1] if len(parts_line) > 1 else ""
 
-                # Handle verse ranges like "18-19"
+                # for verse ranges ex: "18-19"
                 if '-' in verse_number:
                     start, end = verse_number.split('-')
                     for v in range(int(start), int(end)+1):
@@ -233,10 +231,10 @@ def segment_by_verse(folder_path):
                 else:
                     rows.append([book_name, chapter, int(verse_number), verse_text])
 
-    # Sort rows by chapter then verse
+    # sort by chapter then verse
     rows.sort(key=lambda x: (x[1], x[2]))
 
-    # Write CSV
+    #write to csv file
     with open(output_path, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["book", "chapter", "verse_number", "text"])
@@ -255,7 +253,6 @@ def csvs_to_excel(folder_paths, output_excel):
 
     with pd.ExcelWriter(output_excel, engine='xlsxwriter') as writer:
         for folder_path in folder_paths:
-            # Determine language_book name for sheet
             parts = folder_path.replace("\\", "/").split("/")
             language = parts[-2]
             book = parts[-1]
@@ -265,9 +262,8 @@ def csvs_to_excel(folder_paths, output_excel):
                 print(f"CSV not found: {csv_file}")
                 continue
 
-            # Read CSV
+            #read and write
             df = pd.read_csv(csv_file)
-            # Write to Excel sheet
             sheet_name = f"{language}_{book}"
             df.to_excel(writer, sheet_name=sheet_name, index=False)
 

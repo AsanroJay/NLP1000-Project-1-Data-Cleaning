@@ -35,4 +35,4 @@ for chapter in range(1, chapters+1):
     with open(filename, "w", encoding="utf-8") as f:
         f.write("\n".join(chapter_text))
 
-    time.sleep(2)  # pause between requests
+    time.sleep(2)  

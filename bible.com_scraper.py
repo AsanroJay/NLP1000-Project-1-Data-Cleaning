@@ -35,11 +35,10 @@ for chapter in range(1, chapters+1):
     page = requests.get(full_url, headers=headers)
     soup = BeautifulSoup(page.text, "html.parser")
 
-    # 🔹 Remove fact bubbles completely before scraping
+    # Remove fact bubbles before scraping
     for note in soup.find_all("span", class_=lambda c: c and "ChapterContent_note__" in c):
         note.decompose()
 
-    # 🔹 Now collect only verse spans
     verses = soup.find_all("span", attrs={"data-usfm": True})
 
     chapter_text = []
@@ -53,5 +52,5 @@ for chapter in range(1, chapters+1):
     with open(filename, "w", encoding="utf-8") as f:
         f.write("\n".join(chapter_text))
 
-    time.sleep(2)  # pause between requests
+    time.sleep(2)  
 
