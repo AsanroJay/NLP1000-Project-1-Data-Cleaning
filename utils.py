@@ -1,5 +1,7 @@
 import re
 import os
+import csv
+import pandas as pd
 
 def clean_text_folder(raw_dir, clean_dir, expressions):
     """
@@ -180,3 +182,96 @@ def align_verses(book, chapters, folder):
             f.write(aligned)
 
         print(f"Aligned {filename}")
+
+def segment_by_verse(folder_path):
+    """
+    Creates a CSV with columns: book, chapter, verse_number, text
+    from cleaned Bible files in a folder.
+
+    Handles verse ranges like '18-19 Text' by splitting them into separate rows,
+    ensuring that each verse number matches exactly the same text as in the file.
+
+    Automatically sorts rows by chapter and verse.
+    """
+
+    # Determine output path
+    parts = folder_path.replace("\\", "/").split("/")
+    language = parts[-2]
+    book = parts[-1]
+    output_dir = os.path.join(*parts[:-3], "CSV")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, f"{language}_{book}.csv")
+
+    rows = []
+
+    for file in os.listdir(folder_path):
+        if not file.endswith(".txt"):
+            continue
+
+        name, _ = os.path.splitext(file)
+        if "_" not in name:
+            continue
+
+        book_name, chapter = name.rsplit("_", 1)
+        chapter = int(chapter)
+
+        with open(os.path.join(folder_path, file), "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+
+                parts_line = line.split(maxsplit=1)
+                verse_number = parts_line[0]
+                verse_text = parts_line[1] if len(parts_line) > 1 else ""
+
+                # Handle verse ranges like "18-19"
+                if '-' in verse_number:
+                    start, end = verse_number.split('-')
+                    for v in range(int(start), int(end)+1):
+                        rows.append([book_name, chapter, v, verse_text])
+                else:
+                    rows.append([book_name, chapter, int(verse_number), verse_text])
+
+    # Sort rows by chapter then verse
+    rows.sort(key=lambda x: (x[1], x[2]))
+
+    # Write CSV
+    with open(output_path, "w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["book", "chapter", "verse_number", "text"])
+        writer.writerows(rows)
+
+    print(f"Saved {len(rows)} verses to {output_path}")
+    
+    
+def csvs_to_excel(folder_paths, output_excel):
+    """
+    Combines multiple CSVs into a single Excel file, each as a separate sheet.
+    
+    folder_paths: list of folder paths containing the CSVs (or individual CSV files)
+    output_excel: path for the resulting Excel workbook
+    """
+
+    with pd.ExcelWriter(output_excel, engine='xlsxwriter') as writer:
+        for folder_path in folder_paths:
+            # Determine language_book name for sheet
+            parts = folder_path.replace("\\", "/").split("/")
+            language = parts[-2]
+            book = parts[-1]
+            csv_file = os.path.join("Bible/CSV", f"{language}_{book}.csv")
+
+            if not os.path.exists(csv_file):
+                print(f"CSV not found: {csv_file}")
+                continue
+
+            # Read CSV
+            df = pd.read_csv(csv_file)
+            # Write to Excel sheet
+            sheet_name = f"{language}_{book}"
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+    print(f"Saved Excel workbook to {output_excel}")
+
+def count_corpus_size(folder_path):
+    pass
