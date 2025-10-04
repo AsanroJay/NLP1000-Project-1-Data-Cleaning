@@ -270,10 +270,39 @@ def csvs_to_excel(folder_paths, output_excel):
 
     print(f"Saved Excel workbook to {output_excel}")
 
-def count_corpus_size(folder_path):
-    pass
 
+def count_corpus_size(cleaned_folder):
+    """
+    Counts total words per language in a cleaned folder with book subfolders.
 
+    Args:
+        cleaned_folder (str): Path to folder containing language subfolders
+
+    Returns:
+        dict: language -> total word count
+    """
+
+    corpus_sizes = {}
+
+    for language in os.listdir(cleaned_folder):
+        lang_path = os.path.join(cleaned_folder, language)
+        if not os.path.isdir(lang_path):
+            continue
+
+        total_words = 0
+
+        # Walk all subfolders (books) recursively
+        for root, dirs, files in os.walk(lang_path):
+            for file in files:
+                if file.lower().endswith(".txt"):
+                    file_path = os.path.join(root, file)
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        text = f.read()
+                        total_words += len(text.split())
+
+        corpus_sizes[language] = total_words
+
+    return corpus_sizes
 
 def load_language_corpus(csv_paths):
     """
