@@ -313,4 +313,28 @@ def create_parallel_corpora(lang_files, pairs, output_dir):
 
         out_path = os.path.join(output_dir, f"{lang1}_{lang2}_parallel.csv")
         merged.to_csv(out_path, index=False, encoding="utf-8")
-        print(f"✅ Saved: {out_path}")
+        print(f"Saved: {out_path}")
+        
+        
+def merge_csvs_to_excel(csv_files, output_excel):
+    """
+    Combines multiple CSVs into a single Excel file, each as a separate sheet.
+
+    Parameters:
+    - csv_files: list of full paths to CSV files
+    - output_excel: path for the resulting Excel workbook
+    """
+
+    with pd.ExcelWriter(output_excel, engine='xlsxwriter') as writer:
+        for csv_file in csv_files:
+            if not os.path.exists(csv_file):
+                print(f"CSV not found: {csv_file}")
+                continue
+
+            df = pd.read_csv(csv_file)
+
+            # Sheet name: filename without extension, truncated to 31 chars
+            sheet_name = os.path.splitext(os.path.basename(csv_file))[0][:31]
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+    print(f"Saved Excel workbook to {output_excel}")
